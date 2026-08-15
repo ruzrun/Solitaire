@@ -1,7 +1,8 @@
 /* =========================================================
    SOLITAIRE 🃏
    Classic Klondike
-   Tap-to-move + Drag-to-move
+   Mobile: TAP → TAP
+   Desktop: DRAG → DROP
 ========================================================= */
 
 
@@ -9,14 +10,9 @@
    DOM
 ========================================================= */
 
-const stockElement =
-    document.getElementById("stock");
-
-const wasteElement =
-    document.getElementById("waste");
-
-const tableauElement =
-    document.getElementById("tableau");
+const stockElement = document.getElementById("stock");
+const wasteElement = document.getElementById("waste");
+const tableauElement = document.getElementById("tableau");
 
 const foundationElements = {
     hearts: document.getElementById("foundation-hearts"),
@@ -25,30 +21,17 @@ const foundationElements = {
     spades: document.getElementById("foundation-spades")
 };
 
-const movesDisplay =
-    document.getElementById("moves");
-
-const timerDisplay =
-    document.getElementById("timer");
-
-const restartButton =
-    document.getElementById("restartButton");
-
-const gameMessage =
-    document.getElementById("gameMessage");
-
-const musicButton =
-    document.getElementById("musicButton");
-
-const winOverlay =
-    document.getElementById("winOverlay");
-
-const winRestartButton =
-    document.getElementById("winRestartButton");
+const movesDisplay = document.getElementById("moves");
+const timerDisplay = document.getElementById("timer");
+const restartButton = document.getElementById("restartButton");
+const gameMessage = document.getElementById("gameMessage");
+const musicButton = document.getElementById("musicButton");
+const winOverlay = document.getElementById("winOverlay");
+const winRestartButton = document.getElementById("winRestartButton");
 
 
 /* =========================================================
-   CARD IMAGES
+   CARD IMAGE SOURCE
 ========================================================= */
 
 const CARD_BASE_URL =
@@ -56,7 +39,9 @@ const CARD_BASE_URL =
 
 
 /*
-   Your custom card back.
+   YOUR CUSTOM CARD BACK
+
+   You can replace this URL whenever you want.
 */
 
 const CARD_BACK_IMAGE =
@@ -91,7 +76,6 @@ const ranks = [
 ];
 
 const rankValues = {
-
     ace: 1,
 
     "2": 2,
@@ -107,7 +91,6 @@ const rankValues = {
     jack: 11,
     queen: 12,
     king: 13
-
 };
 
 const redSuits = new Set([
@@ -121,9 +104,7 @@ const redSuits = new Set([
 ========================================================= */
 
 let deck = [];
-
 let stock = [];
-
 let waste = [];
 
 let foundations = {
@@ -144,31 +125,41 @@ let tableau = [
 ];
 
 let moves = 0;
-
 let elapsedTime = 0;
 
 let timerInterval = null;
 
 let gameStarted = false;
-
 let gameWon = false;
 
 
 /* =========================================================
-   SELECTION
+   TAP SELECTION
 ========================================================= */
 
-let selectedCards = null;
+/*
+   This is the important mobile system.
 
+   Example:
+
+   Tap 7♥
+      ↓
+   selectedCards = [7♥]
+
+   Tap 8♣
+      ↓
+   7♥ moves onto 8♣
+*/
+
+let selectedCards = null;
 let selectedSource = null;
 
 
 /* =========================================================
-   DRAG STATE
+   DESKTOP DRAG STATE
 ========================================================= */
 
 let draggedCards = null;
-
 let draggedSource = null;
 
 
@@ -180,7 +171,6 @@ const backgroundMusic =
     new Audio("music.mp3");
 
 backgroundMusic.loop = true;
-
 backgroundMusic.volume = 0.35;
 
 let musicEnabled = true;
@@ -342,8 +332,7 @@ function dealCards() {
     stock.forEach(
         card => {
 
-            card.faceUp =
-                false;
+            card.faceUp = false;
 
         }
     );
@@ -360,9 +349,7 @@ function newGame() {
     stopTimer();
 
     deck = [];
-
     stock = [];
-
     waste = [];
 
 
@@ -386,24 +373,21 @@ function newGame() {
 
 
     moves = 0;
-
     elapsedTime = 0;
 
     gameStarted = false;
-
     gameWon = false;
 
 
     clearSelection();
 
     createDeck();
-
     dealCards();
 
 
     updateMoves();
-
     updateTimer();
+
 
     hideWinOverlay();
 
@@ -428,10 +412,10 @@ function ensureGameStarted() {
         return;
     }
 
+
     gameStarted = true;
 
     startTimer();
-
     startMusic();
 
 }
@@ -444,6 +428,7 @@ function ensureGameStarted() {
 function startTimer() {
 
     stopTimer();
+
 
     timerInterval =
         setInterval(
@@ -460,6 +445,7 @@ function startTimer() {
                     return;
 
                 }
+
 
                 elapsedTime++;
 
@@ -493,6 +479,7 @@ function updateTimer() {
         return;
     }
 
+
     timerDisplay.textContent =
         String(
             elapsedTime
@@ -523,6 +510,7 @@ function updateMoves() {
         return;
     }
 
+
     movesDisplay.textContent =
         moves;
 
@@ -539,6 +527,7 @@ function updateMessage(message) {
         return;
     }
 
+
     gameMessage.textContent =
         message;
 
@@ -546,17 +535,14 @@ function updateMessage(message) {
 
 
 /* =========================================================
-   RENDER EVERYTHING
+   RENDER
 ========================================================= */
 
 function render() {
 
     renderStock();
-
     renderWaste();
-
     renderFoundations();
-
     renderTableau();
 
 }
@@ -607,8 +593,8 @@ function createCardElement(card) {
 
 
     /*
-       Prevent mobile browser
-       image dragging behaviour.
+       Stop browser image dragging
+       from interfering with mobile.
     */
 
     image.addEventListener(
@@ -668,21 +654,29 @@ function renderStock() {
             back
         );
 
-    }
-
-    else if (
-        waste.length > 0
-    ) {
+    } else {
 
         stockElement.classList.add(
             "empty"
         );
 
-        stockElement.textContent =
-            "↻";
+
+        if (
+            waste.length > 0
+        ) {
+
+            stockElement.textContent =
+                "↻";
+
+        }
 
     }
 
+
+    /*
+       IMPORTANT:
+       Stock gets its own click.
+    */
 
     stockElement.onclick =
         event => {
@@ -719,12 +713,14 @@ function drawFromStock() {
         const card =
             stock.pop();
 
-        card.faceUp =
-            true;
+
+        card.faceUp = true;
+
 
         waste.push(
             card
         );
+
 
         addMove();
 
@@ -743,8 +739,7 @@ function drawFromStock() {
         stock.forEach(
             card => {
 
-                card.faceUp =
-                    false;
+                card.faceUp = false;
 
             }
         );
@@ -771,8 +766,7 @@ function renderWaste() {
     }
 
 
-    wasteElement.innerHTML =
-        "";
+    wasteElement.innerHTML = "";
 
 
     if (
@@ -833,8 +827,7 @@ function renderFoundations() {
             }
 
 
-            element.innerHTML =
-                "";
+            element.innerHTML = "";
 
 
             const pile =
@@ -844,6 +837,16 @@ function renderFoundations() {
             if (
                 pile.length === 0
             ) {
+
+                /*
+                   Foundation remains clickable
+                   even when empty.
+                */
+
+                setupFoundationTarget(
+                    element,
+                    suit
+                );
 
                 return;
 
@@ -879,8 +882,210 @@ function renderFoundations() {
                 image
             );
 
+
+            setupFoundationTarget(
+                element,
+                suit
+            );
+
         }
     );
+
+}
+
+
+/* =========================================================
+   FOUNDATION TARGET
+========================================================= */
+
+function setupFoundationTarget(
+    element,
+    suit
+) {
+
+    /*
+       Remove old handler.
+
+       This prevents duplicate click
+       handlers after every render.
+    */
+
+    element.onclick = null;
+
+
+    element.onclick =
+        event => {
+
+            /*
+               If the player tapped the card,
+               its own click handler handles it.
+            */
+
+            if (
+                event.target !== element
+            ) {
+
+                return;
+
+            }
+
+
+            if (!selectedCards) {
+                return;
+            }
+
+
+            if (
+                selectedCards.length !== 1
+            ) {
+
+                showMoveFeedback(
+                    false,
+                    element
+                );
+
+                return;
+
+            }
+
+
+            const card =
+                selectedCards[0];
+
+
+            if (
+                card.suit !== suit
+            ) {
+
+                showMoveFeedback(
+                    false,
+                    element
+                );
+
+                return;
+
+            }
+
+
+            const valid =
+                canMoveToFoundation(
+                    card,
+                    selectedSource
+                );
+
+
+            if (valid) {
+
+                moveCardToFoundation(
+                    card,
+                    selectedSource
+                );
+
+
+                showMoveFeedback(
+                    true,
+                    element
+                );
+
+            } else {
+
+                showMoveFeedback(
+                    false,
+                    element
+                );
+
+            }
+
+        };
+
+
+    /*
+       Desktop drag target.
+    */
+
+    element.ondragover =
+        event => {
+
+            event.preventDefault();
+
+
+            if (
+                !draggedCards ||
+                draggedCards.length !== 1
+            ) {
+
+                return;
+
+            }
+
+
+            const valid =
+                canMoveToFoundation(
+                    draggedCards[0],
+                    draggedSource
+                );
+
+
+            element.classList.toggle(
+                "valid-drop",
+                valid
+            );
+
+
+            element.classList.toggle(
+                "invalid-drop",
+                !valid
+            );
+
+        };
+
+
+    element.ondragleave =
+        () => {
+
+            element.classList.remove(
+                "valid-drop",
+                "invalid-drop"
+            );
+
+        };
+
+
+    element.ondrop =
+        event => {
+
+            event.preventDefault();
+
+
+            element.classList.remove(
+                "valid-drop",
+                "invalid-drop"
+            );
+
+
+            if (
+                draggedCards &&
+                draggedCards.length === 1
+            ) {
+
+                const valid =
+                    moveCardToFoundation(
+                        draggedCards[0],
+                        draggedSource
+                    );
+
+
+                showMoveFeedback(
+                    valid,
+                    element
+                );
+
+            }
+
+
+            clearSelection();
+
+        };
 
 }
 
@@ -908,8 +1113,7 @@ function renderTableau() {
             columnIndex
         ) => {
 
-            columnElement.innerHTML =
-                "";
+            columnElement.innerHTML = "";
 
 
             const column =
@@ -921,6 +1125,79 @@ function renderTableau() {
                 column.length === 0
             );
 
+
+            /*
+               IMPORTANT:
+               Only ONE click handler per render.
+            */
+
+            columnElement.onclick = null;
+
+
+            /*
+               EMPTY COLUMN
+
+               Only a King can be placed here.
+            */
+
+            if (
+                column.length === 0
+            ) {
+
+                columnElement.onclick =
+                    event => {
+
+                        event.stopPropagation();
+
+
+                        if (
+                            !selectedCards
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        const valid =
+                            canMoveToTableau(
+                                selectedCards,
+                                selectedSource,
+                                columnIndex
+                            );
+
+
+                        if (valid) {
+
+                            moveToTableau(
+                                selectedCards,
+                                selectedSource,
+                                columnIndex
+                            );
+
+
+                            showMoveFeedback(
+                                true,
+                                columnElement
+                            );
+
+                        } else {
+
+                            showMoveFeedback(
+                                false,
+                                columnElement
+                            );
+
+                        }
+
+                    };
+
+            }
+
+
+            /*
+               Render every card.
+            */
 
             column.forEach(
                 (
@@ -960,37 +1237,7 @@ function renderTableau() {
 
 
             /*
-               EMPTY COLUMN / COLUMN AREA TAP
-
-               This is what lets you put a King
-               into an empty slot.
-            */
-
-            columnElement.addEventListener(
-                "click",
-                event => {
-
-                    if (
-                        event.target !==
-                        columnElement
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    handleTableauDestination(
-                        columnIndex,
-                        columnElement
-                    );
-
-                }
-            );
-
-
-            /*
-               Desktop drag.
+               Desktop drag/drop.
             */
 
             columnElement.ondragover =
@@ -1094,7 +1341,9 @@ function addCardInteraction(
 ) {
 
     /*
-       CLICK / TAP
+       =====================================================
+       TAP
+       =====================================================
     */
 
     element.addEventListener(
@@ -1102,7 +1351,6 @@ function addCardInteraction(
         event => {
 
             event.preventDefault();
-
             event.stopPropagation();
 
 
@@ -1115,8 +1363,7 @@ function addCardInteraction(
             ) {
 
                 if (
-                    source.type ===
-                    "tableau"
+                    source.type === "tableau"
                 ) {
 
                     const column =
@@ -1125,24 +1372,30 @@ function addCardInteraction(
                         ];
 
 
-                    if (
+                    const top =
                         column[
                             column.length - 1
-                        ] === card
+                        ];
+
+
+                    /*
+                       Only top face-down card
+                       can be flipped.
+                    */
+
+                    if (
+                        top === card
                     ) {
 
                         ensureGameStarted();
 
-                        card.faceUp =
-                            true;
+                        card.faceUp = true;
 
                         addMove();
 
-                        render();
+                        vibrate(25);
 
-                        vibrate(
-                            25
-                        );
+                        render();
 
                     }
 
@@ -1153,9 +1406,10 @@ function addCardInteraction(
             }
 
 
-            handleCardClick(
+            handleCardTap(
                 card,
-                source
+                source,
+                element
             );
 
         }
@@ -1163,9 +1417,10 @@ function addCardInteraction(
 
 
     /*
-       DOUBLE CLICK / DOUBLE TAP
-       automatically sends card
-       to foundation.
+       =====================================================
+       DOUBLE CLICK
+       Automatically move to foundation.
+       =====================================================
     */
 
     element.addEventListener(
@@ -1173,7 +1428,6 @@ function addCardInteraction(
         event => {
 
             event.preventDefault();
-
             event.stopPropagation();
 
 
@@ -1203,6 +1457,7 @@ function addCardInteraction(
                     source
                 );
 
+
                 showMoveFeedback(
                     true,
                     element
@@ -1222,7 +1477,9 @@ function addCardInteraction(
 
 
     /*
+       =====================================================
        DESKTOP DRAG
+       =====================================================
     */
 
     element.addEventListener(
@@ -1240,7 +1497,7 @@ function addCardInteraction(
             }
 
 
-            const cards =
+            const movable =
                 getMovableCards(
                     card,
                     source
@@ -1248,7 +1505,7 @@ function addCardInteraction(
 
 
             if (
-                cards.length === 0
+                movable.length === 0
             ) {
 
                 event.preventDefault();
@@ -1262,7 +1519,7 @@ function addCardInteraction(
 
 
             draggedCards =
-                cards;
+                movable;
 
             draggedSource =
                 source;
@@ -1296,7 +1553,6 @@ function addCardInteraction(
 
 
             draggedCards = null;
-
             draggedSource = null;
 
 
@@ -1305,9 +1561,9 @@ function addCardInteraction(
                     ".valid-drop, .invalid-drop"
                 )
                 .forEach(
-                    item => {
+                    element => {
 
-                        item.classList.remove(
+                        element.classList.remove(
                             "valid-drop",
                             "invalid-drop"
                         );
@@ -1322,12 +1578,13 @@ function addCardInteraction(
 
 
 /* =========================================================
-   TAP CARD
+   HANDLE CARD TAP
 ========================================================= */
 
-function handleCardClick(
+function handleCardTap(
     card,
-    source
+    source,
+    element
 ) {
 
     if (gameWon) {
@@ -1339,9 +1596,9 @@ function handleCardClick(
 
 
     /*
-       NOTHING SELECTED
-
-       First tap selects card.
+       =====================================================
+       FIRST TAP
+       =====================================================
     */
 
     if (!selectedCards) {
@@ -1359,7 +1616,7 @@ function handleCardClick(
 
             showMoveFeedback(
                 false,
-                findCardElement(card)
+                element
             );
 
             return;
@@ -1384,8 +1641,10 @@ function handleCardClick(
 
 
     /*
-       TAP SAME CARD
-       = deselect
+       =====================================================
+       SECOND TAP ON SAME CARD
+       Cancel selection.
+       =====================================================
     */
 
     if (
@@ -1402,21 +1661,24 @@ function handleCardClick(
 
 
     /*
-       TAP TABLEAU CARD
-
-       Try to move selected cards
-       onto this card.
+       =====================================================
+       SECOND TAP ON TABLEAU CARD
+       =====================================================
     */
 
     if (
         source.type === "tableau"
     ) {
 
+        const destinationColumn =
+            source.column;
+
+
         const valid =
             canMoveToTableau(
                 selectedCards,
                 selectedSource,
-                source.column
+                destinationColumn
             );
 
 
@@ -1425,13 +1687,13 @@ function handleCardClick(
             moveToTableau(
                 selectedCards,
                 selectedSource,
-                source.column
+                destinationColumn
             );
 
 
             showMoveFeedback(
                 true,
-                findCardElement(card)
+                element
             );
 
 
@@ -1441,12 +1703,12 @@ function handleCardClick(
 
 
         /*
-           If invalid, show red feedback.
+           WRONG MOVE
         */
 
         showMoveFeedback(
             false,
-            findCardElement(card)
+            element
         );
 
 
@@ -1456,10 +1718,9 @@ function handleCardClick(
 
 
     /*
-       FOUNDATION
-
-       Tap foundation itself is handled
-       separately below.
+       =====================================================
+       SECOND TAP ON FOUNDATION CARD
+       =====================================================
     */
 
     if (
@@ -1470,28 +1731,39 @@ function handleCardClick(
             selectedCards.length === 1
         ) {
 
-            const valid =
-                canMoveToFoundation(
-                    selectedCards[0],
-                    selectedSource
-                );
+            const selectedCard =
+                selectedCards[0];
 
 
-            if (valid) {
+            if (
+                selectedCard.suit ===
+                source.suit
+            ) {
 
-                moveCardToFoundation(
-                    selectedCards[0],
-                    selectedSource
-                );
-
-
-                showMoveFeedback(
-                    true,
-                    findCardElement(card)
-                );
+                const valid =
+                    canMoveToFoundation(
+                        selectedCard,
+                        selectedSource
+                    );
 
 
-                return;
+                if (valid) {
+
+                    moveCardToFoundation(
+                        selectedCard,
+                        selectedSource
+                    );
+
+
+                    showMoveFeedback(
+                        true,
+                        element
+                    );
+
+
+                    return;
+
+                }
 
             }
 
@@ -1500,7 +1772,7 @@ function handleCardClick(
 
         showMoveFeedback(
             false,
-            findCardElement(card)
+            element
         );
 
 
@@ -1510,8 +1782,10 @@ function handleCardClick(
 
 
     /*
-       Tap another movable card
-       to change selection.
+       =====================================================
+       TAP ANOTHER MOVABLE CARD
+       Change selection.
+       =====================================================
     */
 
     const newMovable =
@@ -1544,62 +1818,14 @@ function handleCardClick(
     }
 
 
+    /*
+       INVALID
+    */
+
     showMoveFeedback(
         false,
-        findCardElement(card)
+        element
     );
-
-}
-
-
-/* =========================================================
-   TABLEAU DESTINATION
-========================================================= */
-
-function handleTableauDestination(
-    columnIndex,
-    element
-) {
-
-    if (
-        !selectedCards
-    ) {
-
-        return;
-
-    }
-
-
-    const valid =
-        canMoveToTableau(
-            selectedCards,
-            selectedSource,
-            columnIndex
-        );
-
-
-    if (valid) {
-
-        moveToTableau(
-            selectedCards,
-            selectedSource,
-            columnIndex
-        );
-
-
-        showMoveFeedback(
-            true,
-            element
-        );
-
-    } else {
-
-        showMoveFeedback(
-            false,
-            element
-        );
-
-    }
 
 }
 
@@ -1642,8 +1868,8 @@ function getMovableCards(
 
 
         /*
-           All cards underneath
-           must be face-up.
+           Everything from selected card
+           downward must be face-up.
         */
 
         for (
@@ -1654,6 +1880,46 @@ function getMovableCards(
 
             if (
                 !column[i].faceUp
+            ) {
+
+                return [];
+
+            }
+
+        }
+
+
+        /*
+           Check that the selected sequence
+           itself is valid.
+        */
+
+        for (
+            let i = index;
+            i < column.length - 1;
+            i++
+        ) {
+
+            const current =
+                column[i];
+
+            const next =
+                column[i + 1];
+
+
+            if (
+                isRed(current) ===
+                isRed(next)
+            ) {
+
+                return [];
+
+            }
+
+
+            if (
+                current.value !==
+                next.value + 1
             ) {
 
                 return [];
@@ -1678,10 +1944,14 @@ function getMovableCards(
         source.type === "waste"
     ) {
 
-        if (
+        const top =
             waste[
                 waste.length - 1
-            ] !== card
+            ];
+
+
+        if (
+            top !== card
         ) {
 
             return [];
@@ -1708,10 +1978,14 @@ function getMovableCards(
             ];
 
 
-        if (
+        const top =
             pile[
                 pile.length - 1
-            ] !== card
+            ];
+
+
+        if (
+            top !== card
         ) {
 
             return [];
@@ -1754,7 +2028,7 @@ function canMoveToTableau(
 
 
     /*
-       Don't move to same column.
+       Can't move onto same column.
     */
 
     if (
@@ -1776,7 +2050,6 @@ function canMoveToTableau(
 
     /*
        EMPTY COLUMN
-
        Only King.
     */
 
@@ -1821,7 +2094,7 @@ function canMoveToTableau(
 
 
     /*
-       Descending by one.
+       One number lower.
     */
 
     if (
@@ -1859,7 +2132,8 @@ function canMoveToFoundation(
 
 
     /*
-       Only top card can move.
+       Foundation can only receive
+       a single card.
     */
 
     const movable =
@@ -1878,7 +2152,7 @@ function canMoveToFoundation(
     }
 
 
-    const foundation =
+    const pile =
         foundations[
             card.suit
         ];
@@ -1889,7 +2163,7 @@ function canMoveToFoundation(
     */
 
     if (
-        foundation.length === 0
+        pile.length === 0
     ) {
 
         return (
@@ -1900,8 +2174,8 @@ function canMoveToFoundation(
 
 
     const top =
-        foundation[
-            foundation.length - 1
+        pile[
+            pile.length - 1
         ];
 
 
@@ -1954,7 +2228,8 @@ function moveToTableau(
 
 
     /*
-       Flip card underneath.
+       Turn over the new top card
+       of the source column.
     */
 
     if (
@@ -1975,6 +2250,7 @@ function moveToTableau(
     render();
 
     checkWin();
+
 
     return true;
 
@@ -2002,7 +2278,7 @@ function moveCardToFoundation(
     }
 
 
-    const foundation =
+    const pile =
         foundations[
             card.suit
         ];
@@ -2014,7 +2290,7 @@ function moveCardToFoundation(
     );
 
 
-    foundation.push(
+    pile.push(
         card
     );
 
@@ -2037,6 +2313,7 @@ function moveCardToFoundation(
     render();
 
     checkWin();
+
 
     return true;
 
@@ -2167,8 +2444,7 @@ function flipTopCard(
         !top.faceUp
     ) {
 
-        top.faceUp =
-            true;
+        top.faceUp = true;
 
     }
 
@@ -2176,7 +2452,7 @@ function flipTopCard(
 
 
 /* =========================================================
-   RED?
+   IS RED
 ========================================================= */
 
 function isRed(card) {
@@ -2278,6 +2554,7 @@ function clearSelection() {
 
     selectedSource = null;
 
+
     draggedCards = null;
 
     draggedSource = null;
@@ -2297,182 +2574,23 @@ function clearSelection() {
             }
         );
 
+
+    document
+        .querySelectorAll(
+            ".valid-drop, .invalid-drop"
+        )
+        .forEach(
+            element => {
+
+                element.classList.remove(
+                    "valid-drop",
+                    "invalid-drop"
+                );
+
+            }
+        );
+
 }
-
-
-/* =========================================================
-   FOUNDATION TAP TARGET
-========================================================= */
-
-suits.forEach(
-    suit => {
-
-        const element =
-            foundationElements[suit];
-
-
-        if (!element) {
-            return;
-        }
-
-
-        /*
-           TAP FOUNDATION
-
-           This is important for mobile.
-        */
-
-        element.addEventListener(
-            "click",
-            event => {
-
-                event.stopPropagation();
-
-
-                if (
-                    !selectedCards ||
-                    selectedCards.length !== 1
-                ) {
-
-                    return;
-
-                }
-
-
-                const card =
-                    selectedCards[0];
-
-
-                const valid =
-                    card.suit === suit &&
-                    canMoveToFoundation(
-                        card,
-                        selectedSource
-                    );
-
-
-                if (valid) {
-
-                    moveCardToFoundation(
-                        card,
-                        selectedSource
-                    );
-
-
-                    showMoveFeedback(
-                        true,
-                        element
-                    );
-
-                } else {
-
-                    showMoveFeedback(
-                        false,
-                        element
-                    );
-
-                }
-
-            }
-        );
-
-
-        /*
-           DESKTOP DRAG
-        */
-
-        element.addEventListener(
-            "dragover",
-            event => {
-
-                event.preventDefault();
-
-
-                if (
-                    !draggedCards ||
-                    draggedCards.length !== 1
-                ) {
-
-                    return;
-
-                }
-
-
-                const valid =
-                    canMoveToFoundation(
-                        draggedCards[0],
-                        draggedSource
-                    );
-
-
-                element.classList.toggle(
-                    "valid-drop",
-                    valid
-                );
-
-
-                element.classList.toggle(
-                    "invalid-drop",
-                    !valid
-                );
-
-            }
-        );
-
-
-        element.addEventListener(
-            "dragleave",
-            () => {
-
-                element.classList.remove(
-                    "valid-drop",
-                    "invalid-drop"
-                );
-
-            }
-        );
-
-
-        element.addEventListener(
-            "drop",
-            event => {
-
-                event.preventDefault();
-
-
-                element.classList.remove(
-                    "valid-drop",
-                    "invalid-drop"
-                );
-
-
-                if (
-                    draggedCards &&
-                    draggedCards.length === 1
-                ) {
-
-                    const valid =
-                        moveCardToFoundation(
-                            draggedCards[0],
-                            draggedSource
-                        );
-
-
-                    showMoveFeedback(
-                        valid,
-                        element
-                    );
-
-                }
-
-
-                clearSelection();
-
-            }
-        );
-
-    }
-);
 
 
 /* =========================================================
@@ -2485,6 +2603,12 @@ function showMoveFeedback(
 ) {
 
     if (!element) {
+        vibrate(
+            valid
+                ? [25, 30, 25]
+                : 80
+        );
+
         return;
     }
 
@@ -2496,7 +2620,7 @@ function showMoveFeedback(
 
 
     /*
-       Restart animation.
+       Force animation restart.
     */
 
     void element.offsetWidth;
@@ -2520,9 +2644,7 @@ function showMoveFeedback(
         );
 
 
-        vibrate(
-            80
-        );
+        vibrate(80);
 
     }
 
@@ -2560,10 +2682,7 @@ function vibrate(pattern) {
 
         } catch (error) {
 
-            /*
-               Some browsers don't allow
-               vibration.
-            */
+            // Vibration unsupported.
 
         }
 
@@ -2586,7 +2705,9 @@ function checkWin() {
         suit => {
 
             totalCards +=
-                foundations[suit].length;
+                foundations[
+                    suit
+                ].length;
 
         }
     );
@@ -2771,7 +2892,7 @@ if (musicButton) {
 
 
 /* =========================================================
-   START MUSIC AFTER USER INTERACTION
+   START MUSIC AFTER USER ACTION
 ========================================================= */
 
 document.addEventListener(
@@ -2795,7 +2916,7 @@ document.addEventListener(
 
 
 /* =========================================================
-   START
+   START GAME
 ========================================================= */
 
 newGame();
