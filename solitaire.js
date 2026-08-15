@@ -9,9 +9,6 @@
    DOM
 ========================================================= */
 
-const board =
-    document.getElementById("solitaireBoard");
-
 const stockElement =
     document.getElementById("stock");
 
@@ -22,19 +19,10 @@ const tableauElement =
     document.getElementById("tableau");
 
 const foundationElements = {
-
-    hearts:
-        document.getElementById("foundation-hearts"),
-
-    diamonds:
-        document.getElementById("foundation-diamonds"),
-
-    clubs:
-        document.getElementById("foundation-clubs"),
-
-    spades:
-        document.getElementById("foundation-spades")
-
+    hearts: document.getElementById("foundation-hearts"),
+    diamonds: document.getElementById("foundation-diamonds"),
+    clubs: document.getElementById("foundation-clubs"),
+    spades: document.getElementById("foundation-spades")
 };
 
 const movesDisplay =
@@ -60,38 +48,26 @@ const winRestartButton =
 
 
 /* =========================================================
-   WEBISSO CARD DATA
+   CARD SOURCE
 ========================================================= */
 
-const CARD_DATA_URL =
-    "https://webisso.github.io/playing-cards/cards.json";
-
-
-let cardData = null;
-
-let cardBaseURL =
-    "https://webisso.github.io/playing-cards";
+const CARD_BASE_URL =
+    "https://webisso.github.io/playing-cards/png";
 
 
 /* =========================================================
    CUSTOM CARD BACK
-=========================================================*/
+=========================================================
 
-   /*Leave this empty for a plain white card back.
+   Your image:
 
-   Later you can simply change it to:
+   https://github.com/ruzrun/Monthniversary/blob/main/photo1.png
 
-   const CARD_BACK_IMAGE =
-       "image/card-back.png";
+   Raw image version:
+========================================================= */
 
-   or:*/
-
-   const CARD_BACK_IMAGE =
-       "https://github.com/ruzrun/Monthniversary/blob/main/photo1.png";
-
-/*========================================================= */
-
-const CARD_BACK_IMAGE = "";
+const CARD_BACK_IMAGE =
+    "https://raw.githubusercontent.com/ruzrun/Monthniversary/main/photo1.png";
 
 
 /* =========================================================
@@ -162,12 +138,10 @@ let waste = [];
 
 
 let foundations = {
-
     hearts: [],
     diamonds: [],
     clubs: [],
     spades: []
-
 };
 
 
@@ -193,19 +167,18 @@ let gameStarted = false;
 let gameWon = false;
 
 
-/*
-   Currently selected cards.
-   Used mainly for mobile tap-to-move.
-*/
+/* =========================================================
+   SELECTION
+========================================================= */
 
 let selectedCards = null;
 
 let selectedSource = null;
 
 
-/*
-   Used for desktop drag-and-drop.
-*/
+/* =========================================================
+   DRAGGING
+========================================================= */
 
 let draggedCards = null;
 
@@ -227,7 +200,7 @@ let musicEnabled = true;
 
 
 /* =========================================================
-   RANDOMISE ARRAY
+   SHUFFLE
 ========================================================= */
 
 function shuffle(array) {
@@ -243,7 +216,6 @@ function shuffle(array) {
                 Math.random() * (i + 1)
             );
 
-
         [
             array[i],
             array[j]
@@ -255,7 +227,6 @@ function shuffle(array) {
     }
 
     return array;
-
 }
 
 
@@ -263,10 +234,7 @@ function shuffle(array) {
    CREATE CARD
 ========================================================= */
 
-function createCard(
-    suit,
-    rank
-) {
+function createCard(suit, rank) {
 
     return {
 
@@ -296,85 +264,10 @@ function createCard(
 
 function getCardImage(card) {
 
-    if (
-        !cardData ||
-        !cardData.cards ||
-        !cardData.cards[card.suit] ||
-        !cardData.cards[card.suit][card.rank]
-    ) {
-
-        return "";
-
-    }
-
-
-    const path =
-        cardData
-            .cards[card.suit][card.rank]
-            .png;
-
-
-    return `${cardBaseURL}/${path}`;
-
-}
-
-
-/* =========================================================
-   LOAD CARD DATA
-========================================================= */
-
-async function loadCardData() {
-
-    try {
-
-        const response =
-            await fetch(
-                CARD_DATA_URL
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Could not load card data."
-            );
-
-        }
-
-
-        cardData =
-            await response.json();
-
-
-        /*
-           Some versions of the data may
-           provide their own base URL.
-        */
-
-        if (cardData.baseUrl) {
-
-            cardBaseURL =
-                cardData.baseUrl;
-
-        }
-
-
-        newGame();
-
-
-    } catch (error) {
-
-        console.error(
-            "Card data error:",
-            error
-        );
-
-
-        updateMessage(
-            "Could not load the cards. Please refresh the page."
-        );
-
-    }
+    return (
+        `${CARD_BASE_URL}/` +
+        `${card.rank}_of_${card.suit}.png`
+    );
 
 }
 
@@ -386,7 +279,6 @@ async function loadCardData() {
 function createDeck() {
 
     deck = [];
-
 
     suits.forEach(
         suit => {
@@ -407,17 +299,16 @@ function createDeck() {
         }
     );
 
-
     shuffle(deck);
 
 }
 
 
 /* =========================================================
-   CREATE EMPTY TABLEAU
+   DEAL KLONDIKE
 ========================================================= */
 
-function createEmptyTableau() {
+function dealCards() {
 
     tableau = [
         [],
@@ -429,28 +320,17 @@ function createEmptyTableau() {
         []
     ];
 
-}
-
-
-/* =========================================================
-   DEAL KLONDIKE
-========================================================= */
-
-function dealCards() {
-
-    createEmptyTableau();
-
 
     /*
-       Seven tableau columns.
+       7 columns:
 
-       Column 1 = 1 card
-       Column 2 = 2 cards
-       ...
-       Column 7 = 7 cards
-
-       Only the final card in each
-       column is face-up.
+       1
+       2
+       3
+       4
+       5
+       6
+       7
     */
 
     for (
@@ -468,10 +348,8 @@ function dealCards() {
             const card =
                 deck.pop();
 
-
             card.faceUp =
                 i === column;
-
 
             tableau[column].push(
                 card
@@ -484,12 +362,11 @@ function dealCards() {
 
     /*
        Remaining 24 cards
-       become the stock.
+       go into the stock.
     */
 
     stock =
         deck.splice(0);
-
 
     stock.forEach(
         card => {
@@ -509,13 +386,7 @@ function dealCards() {
 
 function newGame() {
 
-    if (!cardData) {
-        return;
-    }
-
-
     stopTimer();
-
 
     deck = [];
 
@@ -525,12 +396,10 @@ function newGame() {
 
 
     foundations = {
-
         hearts: [],
         diamonds: [],
         clubs: [],
         spades: []
-
     };
 
 
@@ -554,13 +423,7 @@ function newGame() {
     gameWon = false;
 
 
-    selectedCards = null;
-
-    selectedSource = null;
-
-    draggedCards = null;
-
-    draggedSource = null;
+    clearSelection();
 
 
     createDeck();
@@ -571,6 +434,7 @@ function newGame() {
     updateMoves();
 
     updateTimer();
+
 
     hideWinOverlay();
 
@@ -591,15 +455,15 @@ function newGame() {
 
 function ensureGameStarted() {
 
-    if (!gameStarted) {
-
-        gameStarted = true;
-
-        startTimer();
-
-        startMusic();
-
+    if (gameStarted) {
+        return;
     }
+
+    gameStarted = true;
+
+    startTimer();
+
+    startMusic();
 
 }
 
@@ -611,7 +475,6 @@ function ensureGameStarted() {
 function startTimer() {
 
     stopTimer();
-
 
     timerInterval =
         setInterval(
@@ -628,7 +491,6 @@ function startTimer() {
                     return;
 
                 }
-
 
                 elapsedTime++;
 
@@ -658,17 +520,17 @@ function stopTimer() {
 
 function updateTimer() {
 
-    if (timerDisplay) {
-
-        timerDisplay.textContent =
-            String(
-                elapsedTime
-            ).padStart(
-                3,
-                "0"
-            );
-
+    if (!timerDisplay) {
+        return;
     }
+
+    timerDisplay.textContent =
+        String(
+            elapsedTime
+        ).padStart(
+            3,
+            "0"
+        );
 
 }
 
@@ -688,12 +550,12 @@ function addMove() {
 
 function updateMoves() {
 
-    if (movesDisplay) {
-
-        movesDisplay.textContent =
-            moves;
-
+    if (!movesDisplay) {
+        return;
     }
+
+    movesDisplay.textContent =
+        moves;
 
 }
 
@@ -704,18 +566,18 @@ function updateMoves() {
 
 function updateMessage(message) {
 
-    if (gameMessage) {
-
-        gameMessage.textContent =
-            message;
-
+    if (!gameMessage) {
+        return;
     }
+
+    gameMessage.textContent =
+        message;
 
 }
 
 
 /* =========================================================
-   RENDER EVERYTHING
+   RENDER
 ========================================================= */
 
 function render() {
@@ -745,66 +607,36 @@ function createCardElement(card) {
         "card";
 
 
-    image.alt =
-        card.faceUp
-            ? `${card.rank} of ${card.suit}`
-            : "Face-down card";
+    image.draggable =
+        false;
 
-
-    /*
-       FACE-UP CARD
-    */
 
     if (card.faceUp) {
 
         image.src =
             getCardImage(card);
 
+        image.alt =
+            `${card.rank} of ${card.suit}`;
 
         image.draggable =
             true;
 
-    }
-
-
-    /*
-       FACE-DOWN CARD
-    */
-
-    else {
+    } else {
 
         /*
-           If the user provides a custom
-           image, use it.
+           YOUR CUSTOM CARD BACK
         */
 
-        if (CARD_BACK_IMAGE) {
+        image.src =
+            CARD_BACK_IMAGE;
 
-            image.src =
-                CARD_BACK_IMAGE;
+        image.alt =
+            "Face-down card";
 
-        }
-
-        /*
-           Otherwise use a transparent
-           placeholder and let CSS create
-           the white card back.
-        */
-
-        else {
-
-            image.src =
-                "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-
-            image.classList.add(
-                "custom-card-back"
-            );
-
-        }
-
-
-        image.draggable =
-            false;
+        image.classList.add(
+            "face-down"
+        );
 
     }
 
@@ -820,72 +652,75 @@ function createCardElement(card) {
 
 function renderStock() {
 
-    stockElement.innerHTML =
-        "";
+    if (!stockElement) {
+        return;
+    }
 
+
+    stockElement.innerHTML = "";
 
     stockElement.classList.remove(
         "empty"
     );
 
 
+    /*
+       Stock still has cards.
+    */
+
     if (
-        stock.length === 0
+        stock.length > 0
+    ) {
+
+        const card =
+            {
+                faceUp: false
+            };
+
+
+        const image =
+            createCardElement(card);
+
+
+        image.classList.add(
+            "stock-card"
+        );
+
+
+        stockElement.appendChild(
+            image
+        );
+
+    }
+
+
+    /*
+       Empty stock.
+
+       Show recycle symbol if
+       there are cards in waste.
+    */
+
+    else if (
+        waste.length > 0
     ) {
 
         stockElement.classList.add(
             "empty"
         );
 
-
-        /*
-           Show recycle symbol when
-           stock is empty but waste exists.
-        */
-
-        if (
-            waste.length > 0
-        ) {
-
-            stockElement.textContent =
-                "↻";
-
-        }
-
-        return;
+        stockElement.textContent =
+            "↻";
 
     }
 
 
-    const card =
-        {
-            suit: "spades",
-            rank: "ace",
-            faceUp: false
-        };
-
-
-    const image =
-        createCardElement(card);
-
-
-    image.classList.add(
-        "stock-card"
-    );
-
-
-    image.classList.add(
-        "face-down"
-    );
-
-
-    stockElement.appendChild(
-        image
-    );
-
-
     stockElement.onclick =
-        drawFromStock;
+        () => {
+
+            drawFromStock();
+
+        };
 
 }
 
@@ -943,7 +778,6 @@ function drawFromStock() {
         stock =
             waste.reverse();
 
-
         waste = [];
 
 
@@ -972,6 +806,11 @@ function drawFromStock() {
 ========================================================= */
 
 function renderWaste() {
+
+    if (!wasteElement) {
+        return;
+    }
+
 
     wasteElement.innerHTML =
         "";
@@ -1105,7 +944,10 @@ function renderTableau() {
 
 
     columns.forEach(
-        (columnElement, columnIndex) => {
+        (
+            columnElement,
+            columnIndex
+        ) => {
 
             columnElement.innerHTML =
                 "";
@@ -1116,14 +958,17 @@ function renderTableau() {
 
 
             column.forEach(
-                (card, cardIndex) => {
+                (
+                    card,
+                    cardIndex
+                ) => {
 
                     const image =
                         createCardElement(card);
 
 
                     /*
-                       Overlap cards vertically.
+                       Card overlap.
                     */
 
                     image.style.top =
@@ -1132,17 +977,6 @@ function renderTableau() {
 
                     image.style.zIndex =
                         cardIndex + 1;
-
-
-                    if (
-                        !card.faceUp
-                    ) {
-
-                        image.classList.add(
-                            "face-down"
-                        );
-
-                    }
 
 
                     addCardInteraction(
@@ -1165,8 +999,7 @@ function renderTableau() {
 
 
             /*
-               Allow tapping an empty
-               tableau column.
+               Empty column tap.
             */
 
             columnElement.onclick =
@@ -1208,7 +1041,7 @@ function renderTableau() {
 
 
             /*
-               Desktop drag-and-drop.
+               Desktop drag.
             */
 
             columnElement.ondragover =
@@ -1229,19 +1062,16 @@ function renderTableau() {
 
 
                     if (
-                        !draggedCards
+                        draggedCards
                     ) {
 
-                        return;
+                        moveToTableau(
+                            draggedCards,
+                            draggedSource,
+                            columnIndex
+                        );
 
                     }
-
-
-                    moveToTableau(
-                        draggedCards,
-                        draggedSource,
-                        columnIndex
-                    );
 
 
                     clearSelection();
@@ -1265,7 +1095,7 @@ function addCardInteraction(
 ) {
 
     /*
-       CLICK / TAP
+       TAP / CLICK
     */
 
     element.addEventListener(
@@ -1276,8 +1106,7 @@ function addCardInteraction(
 
 
             /*
-               Face-down tableau card:
-               flip it if it is the top card.
+               Face-down card.
             */
 
             if (
@@ -1333,10 +1162,7 @@ function addCardInteraction(
 
 
     /*
-       DOUBLE CLICK
-
-       Automatically send a single
-       card to its foundation.
+       DOUBLE TAP / DOUBLE CLICK
     */
 
     element.addEventListener(
@@ -1349,9 +1175,7 @@ function addCardInteraction(
             if (
                 !card.faceUp
             ) {
-
                 return;
-
             }
 
 
@@ -1368,7 +1192,7 @@ function addCardInteraction(
 
 
     /*
-       DESKTOP DRAG START
+       DESKTOP DRAG
     */
 
     element.addEventListener(
@@ -1440,7 +1264,6 @@ function addCardInteraction(
                 "moving"
             );
 
-
             draggedCards = null;
 
             draggedSource = null;
@@ -1452,7 +1275,7 @@ function addCardInteraction(
 
 
 /* =========================================================
-   HANDLE TAP
+   HANDLE CARD CLICK
 ========================================================= */
 
 function handleCardClick(
@@ -1469,10 +1292,7 @@ function handleCardClick(
 
 
     /*
-       A card is already selected.
-
-       Try to move the selected cards
-       onto this card.
+       Something is already selected.
     */
 
     if (
@@ -1480,8 +1300,8 @@ function handleCardClick(
     ) {
 
         /*
-           Don't try to move onto
-           the exact same card.
+           Tapping the selected card
+           cancels selection.
         */
 
         if (
@@ -1497,12 +1317,12 @@ function handleCardClick(
         }
 
 
-        let moved = false;
+        let moved =
+            false;
 
 
         /*
-           A card can be placed onto
-           a tableau card.
+           Move onto tableau.
         */
 
         if (
@@ -1521,7 +1341,7 @@ function handleCardClick(
 
 
         /*
-           Foundation.
+           Move onto foundation.
         */
 
         else if (
@@ -1544,39 +1364,42 @@ function handleCardClick(
         }
 
 
-        if (!moved) {
+        /*
+           Successful move.
+        */
 
-            /*
-               The new card becomes
-               the new selection.
-            */
-
-            clearSelection();
-
-
-            const movable =
-                getMovableCards(
-                    card,
-                    source
-                );
-
-
-            if (
-                movable.length > 0
-            ) {
-
-                selectedCards =
-                    movable;
-
-                selectedSource =
-                    source;
-
-                highlightSelectedCards();
-
-            }
-
-
+        if (moved) {
             return;
+        }
+
+
+        /*
+           Invalid destination.
+
+           Select the new card instead.
+        */
+
+        clearSelection();
+
+
+        const movable =
+            getMovableCards(
+                card,
+                source
+            );
+
+
+        if (
+            movable.length > 0
+        ) {
+
+            selectedCards =
+                movable;
+
+            selectedSource =
+                source;
+
+            highlightSelectedCards();
 
         }
 
@@ -1587,9 +1410,7 @@ function handleCardClick(
 
 
     /*
-       Nothing selected yet.
-
-       Select this card.
+       Nothing selected.
     */
 
     const movable =
@@ -1659,8 +1480,8 @@ function getMovableCards(
 
 
         /*
-           All cards from this card
-           downward must be face-up.
+           Everything underneath
+           must also be face-up.
         */
 
         for (
@@ -1714,9 +1535,6 @@ function getMovableCards(
 
     /*
        FOUNDATION
-
-       Only the top foundation card
-       can be moved back.
     */
 
     if (
@@ -1782,8 +1600,7 @@ function moveToTableau(
 
 
     /*
-       Don't move a tableau stack
-       onto itself.
+       Can't move onto itself.
     */
 
     if (
@@ -1801,8 +1618,7 @@ function moveToTableau(
     /*
        EMPTY COLUMN
 
-       Only a King can be placed
-       in an empty tableau column.
+       Only King.
     */
 
     if (
@@ -1842,7 +1658,7 @@ function moveToTableau(
 
 
         /*
-           Must alternate colours.
+           Colours must alternate.
         */
 
         if (
@@ -1856,7 +1672,7 @@ function moveToTableau(
 
 
         /*
-           Must descend by exactly one.
+           Must descend by one.
         */
 
         if (
@@ -1883,8 +1699,7 @@ function moveToTableau(
 
 
     /*
-       Reveal the new top card
-       of the source column.
+       Reveal card underneath.
     */
 
     if (
@@ -1931,11 +1746,6 @@ function moveCardToFoundation(
     }
 
 
-    /*
-       Only a single card can
-       enter a foundation.
-    */
-
     const movable =
         getMovableCards(
             card,
@@ -1959,7 +1769,7 @@ function moveCardToFoundation(
 
 
     /*
-       Foundation starts with Ace.
+       First card must be Ace.
     */
 
     if (
@@ -1978,8 +1788,7 @@ function moveCardToFoundation(
 
 
     /*
-       Otherwise cards must increase
-       by exactly one.
+       Otherwise next number.
     */
 
     else {
@@ -2039,7 +1848,7 @@ function moveCardToFoundation(
 
 
 /* =========================================================
-   REMOVE CARDS FROM SOURCE
+   REMOVE FROM SOURCE
 ========================================================= */
 
 function removeCardsFromSource(
@@ -2062,14 +1871,14 @@ function removeCardsFromSource(
             ];
 
 
-        const firstIndex =
+        const index =
             column.indexOf(
                 cards[0]
             );
 
 
         if (
-            firstIndex === -1
+            index === -1
         ) {
 
             return;
@@ -2078,7 +1887,7 @@ function removeCardsFromSource(
 
 
         column.splice(
-            firstIndex,
+            index,
             cards.length
         );
 
@@ -2135,21 +1944,12 @@ function removeCardsFromSource(
 
 
 /* =========================================================
-   FLIP TOP CARD
+   FLIP TOP TABLEAU CARD
 ========================================================= */
 
 function flipTopCard(
     columnIndex
 ) {
-
-    if (
-        columnIndex === undefined
-    ) {
-
-        return;
-
-    }
-
 
     const column =
         tableau[
@@ -2158,6 +1958,7 @@ function flipTopCard(
 
 
     if (
+        !column ||
         column.length === 0
     ) {
 
@@ -2185,7 +1986,7 @@ function flipTopCard(
 
 
 /* =========================================================
-   IS RED?
+   RED CARD?
 ========================================================= */
 
 function isRed(card) {
@@ -2198,7 +1999,7 @@ function isRed(card) {
 
 
 /* =========================================================
-   HIGHLIGHT SELECTED CARDS
+   HIGHLIGHT SELECTION
 ========================================================= */
 
 function highlightSelectedCards() {
@@ -2221,39 +2022,27 @@ function highlightSelectedCards() {
     }
 
 
-    /*
-       Find the card elements belonging
-       to the selected cards.
-
-       The visual highlight is kept subtle
-       so it works with your current design.
-    */
-
     selectedCards.forEach(
         card => {
 
-            const elements =
-                document.querySelectorAll(
-                    ".card"
-                );
+            document
+                .querySelectorAll(".card")
+                .forEach(
+                    element => {
 
+                        if (
+                            element.alt ===
+                            `${card.rank} of ${card.suit}`
+                        ) {
 
-            elements.forEach(
-                element => {
+                            element.classList.add(
+                                "moving"
+                            );
 
-                    if (
-                        element.alt ===
-                        `${card.rank} of ${card.suit}`
-                    ) {
-
-                        element.classList.add(
-                            "moving"
-                        );
+                        }
 
                     }
-
-                }
-            );
+                );
 
         }
     );
@@ -2292,7 +2081,7 @@ function clearSelection() {
 
 
 /* =========================================================
-   FOUNDATION DROP
+   FOUNDATION INTERACTION
 ========================================================= */
 
 suits.forEach(
@@ -2352,9 +2141,6 @@ suits.forEach(
 
         /*
            Mobile tap.
-
-           Select a card first,
-           then tap the foundation.
         */
 
         element.addEventListener(
@@ -2365,19 +2151,16 @@ suits.forEach(
 
 
                 if (
-                    !selectedCards ||
-                    selectedCards.length !== 1
+                    selectedCards &&
+                    selectedCards.length === 1
                 ) {
 
-                    return;
+                    moveCardToFoundation(
+                        selectedCards[0],
+                        selectedSource
+                    );
 
                 }
-
-
-                moveCardToFoundation(
-                    selectedCards[0],
-                    selectedSource
-                );
 
             }
         );
@@ -2387,35 +2170,7 @@ suits.forEach(
 
 
 /* =========================================================
-   WASTE CLICK
-========================================================= */
-
-wasteElement.addEventListener(
-    "click",
-    event => {
-
-        /*
-           Clicking the empty waste area
-           cancels selection.
-        */
-
-        if (
-            event.target ===
-            wasteElement
-        ) {
-
-            clearSelection();
-
-            render();
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   RESTART BUTTON
+   RESTART
 ========================================================= */
 
 if (restartButton) {
@@ -2438,14 +2193,14 @@ if (restartButton) {
 
 function checkWin() {
 
-    let total =
+    let totalCards =
         0;
 
 
     suits.forEach(
         suit => {
 
-            total +=
+            totalCards +=
                 foundations[suit].length;
 
         }
@@ -2453,7 +2208,7 @@ function checkWin() {
 
 
     if (
-        total === 52
+        totalCards === 52
     ) {
 
         winGame();
@@ -2464,7 +2219,7 @@ function checkWin() {
 
 
 /* =========================================================
-   WIN GAME
+   WIN
 ========================================================= */
 
 function winGame() {
@@ -2478,7 +2233,6 @@ function winGame() {
 
 
     stopTimer();
-
 
     clearSelection();
 
@@ -2561,12 +2315,8 @@ if (winRestartButton) {
 
 function startMusic() {
 
-    if (
-        !musicEnabled
-    ) {
-
+    if (!musicEnabled) {
         return;
-
     }
 
 
@@ -2643,42 +2393,7 @@ document.addEventListener(
 
 
 /* =========================================================
-   CUSTOM CARD BACK DEFAULT STYLE
+   START GAME
 ========================================================= */
 
-if (
-    !document.getElementById(
-        "custom-card-back-style"
-    )
-) {
-
-    const style =
-        document.createElement("style");
-
-
-    style.id =
-        "custom-card-back-style";
-
-
-    style.textContent = `
-
-        .custom-card-back {
-            background: white !important;
-            object-fit: cover;
-        }
-
-    `;
-
-
-    document.head.appendChild(
-        style
-    );
-
-}
-
-
-/* =========================================================
-   START
-========================================================= */
-
-loadCardData();
+newGame();
