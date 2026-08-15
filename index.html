@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Solitaire 🃏</title>
+
+    <link
+        rel="stylesheet"
+        href="solitaire.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- BACK TO ARCADE -->
+
+    <a
+        href="https://ruzrun.github.io/arcade-game/"
+        class="top-button back-button"
+    >
+        🎮 Arcade
+    </a>
+
+
+    <!-- MUSIC -->
+
+    <button
+        id="musicButton"
+        class="top-button music-button"
+        type="button"
+    >
+        🎵 Music On
+    </button>
+
+
+
+    <!-- GAME -->
+
+    <main class="game-container">
+
+
+        <!-- TITLE -->
+
+        <h1>
+            Solitaire 🃏
+        </h1>
+
+        <p class="subtitle">
+            Classic cards, your way ✨
+        </p>
+
+
+
+        <!-- GAME INFO -->
+
+        <div class="game-info">
+
+            <div class="info-box">
+
+                <span class="info-label">
+                    Moves
+                </span>
+
+                <span id="moves">
+                    0
+                </span>
+
+            </div>
+
+
+            <button
+                id="restartButton"
+                class="restart-button"
+                type="button"
+            >
+                🔄
+            </button>
+
+
+            <div class="info-box">
+
+                <span class="info-label">
+                    Time
+                </span>
+
+                <span id="timer">
+                    000
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- SOLITAIRE BOARD -->
+
+        <section
+            id="solitaireBoard"
+            class="solitaire-board"
+            aria-label="Solitaire game board"
+        >
+
+
+            <!-- TOP ROW -->
+
+            <div class="top-row">
+
+
+                <!-- STOCK -->
+
+                <div
+                    id="stock"
+                    class="pile stock-pile"
+                    aria-label="Stock"
+                >
+                </div>
+
+
+                <!-- WASTE -->
+
+                <div
+                    id="waste"
+                    class="pile waste-pile"
+                    aria-label="Waste"
+                >
+                </div>
+
+
+                <!-- SPACER -->
+
+                <div class="top-spacer">
+                </div>
+
+
+                <!-- FOUNDATIONS -->
+
+                <div
+                    id="foundation-hearts"
+                    class="pile foundation-pile"
+                    data-suit="hearts"
+                    aria-label="Hearts foundation"
+                >
+                </div>
+
+
+                <div
+                    id="foundation-diamonds"
+                    class="pile foundation-pile"
+                    data-suit="diamonds"
+                    aria-label="Diamonds foundation"
+                >
+                </div>
+
+
+                <div
+                    id="foundation-clubs"
+                    class="pile foundation-pile"
+                    data-suit="clubs"
+                    aria-label="Clubs foundation"
+                >
+                </div>
+
+
+                <div
+                    id="foundation-spades"
+                    class="pile foundation-pile"
+                    data-suit="spades"
+                    aria-label="Spades foundation"
+                >
+                </div>
+
+            </div>
+
+
+
+            <!-- TABLEAU -->
+
+            <div
+                id="tableau"
+                class="tableau"
+            >
+
+                <div
+                    class="tableau-column"
+                    data-column="0"
+                >
+                </div>
+
+                <div
+                    class="tableau-column"
+                    data-column="1"
+                >
+                </div>
+
+                <div
+                    class="tableau-column"
+                    data-column="2"
+                >
+                </div>
+
+                <div
+                    class="tableau-column"
+                    data-column="3"
+                >
+                </div>
+
+                <div
+                    class="tableau-column"
+                    data-column="4"
+                >
+                </div>
+
+                <div
+                    class="tableau-column"
+                    data-column="5"
+                >
+                </div>
+
+                <div
+                    class="tableau-column"
+                    data-column="6"
+                >
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- GAME MESSAGE -->
+
+        <p
+            id="gameMessage"
+            class="game-message"
+        >
+            Move the cards and build your foundations 🃏
+        </p>
+
+
+    </main>
+
+
+
+    <!-- WIN MESSAGE -->
+
+    <div
+        id="winOverlay"
+        class="win-overlay"
+        aria-hidden="true"
+    >
+
+        <div class="win-box">
+
+            <div class="win-icon">
+                🎉
+            </div>
+
+            <h2>
+                You Won!
+            </h2>
+
+            <p>
+                All cards are in their foundations! 🃏✨
+            </p>
+
+            <button
+                id="winRestartButton"
+                class="game-button"
+                type="button"
+            >
+                Play Again 🔄
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <script src="solitaire.js"></script>
+
+</body>
+
+</html>
+
+The HTML is now ready for the CSS, and then we'll make the JS handle the actual 52-card Klond
