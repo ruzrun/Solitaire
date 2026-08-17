@@ -166,7 +166,7 @@ let draggedSource = null;
 ========================================================= */
 
 const backgroundMusic =
-    new Audio("music.mp3");
+    new Audio("game.mp3");
 
 backgroundMusic.loop = true;
 backgroundMusic.volume = 0.35;
