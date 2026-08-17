@@ -2633,7 +2633,7 @@ function showMoveFeedback(
         );
 
 
-        vibrate(80);
+        vibrate([70, 40, 70]);
 
     }
 
