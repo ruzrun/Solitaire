@@ -41,7 +41,7 @@ const CARD_BASE_URL =
 /*
    YOUR CUSTOM CARD BACK
 
-   You can replace this URL whenever you want.
+   Replace this URL whenever you want.
 */
 
 const CARD_BACK_IMAGE =
@@ -76,6 +76,7 @@ const ranks = [
 ];
 
 const rankValues = {
+
     ace: 1,
 
     "2": 2,
@@ -91,6 +92,7 @@ const rankValues = {
     jack: 11,
     queen: 12,
     king: 13
+
 };
 
 const redSuits = new Set([
@@ -131,25 +133,12 @@ let timerInterval = null;
 
 let gameStarted = false;
 let gameWon = false;
+let gameOver = false;
 
 
 /* =========================================================
    TAP SELECTION
 ========================================================= */
-
-/*
-   This is the important mobile system.
-
-   Example:
-
-   Tap 7♥
-      ↓
-   selectedCards = [7♥]
-
-   Tap 8♣
-      ↓
-   7♥ moves onto 8♣
-*/
 
 let selectedCards = null;
 let selectedSource = null;
@@ -204,6 +193,7 @@ function shuffle(array) {
     }
 
     return array;
+
 }
 
 
@@ -377,6 +367,7 @@ function newGame() {
 
     gameStarted = false;
     gameWon = false;
+    gameOver = false;
 
 
     clearSelection();
@@ -395,6 +386,14 @@ function newGame() {
     updateMessage(
         "Tap a card, then tap where you want to move it 🃏"
     );
+
+
+    if (restartButton) {
+
+        restartButton.textContent =
+            "🙂";
+
+    }
 
 
     render();
@@ -592,11 +591,6 @@ function createCardElement(card) {
     }
 
 
-    /*
-       Stop browser image dragging
-       from interfering with mobile.
-    */
-
     image.addEventListener(
         "dragstart",
         event => {
@@ -673,11 +667,6 @@ function renderStock() {
     }
 
 
-    /*
-       IMPORTANT:
-       Stock gets its own click.
-    */
-
     stockElement.onclick =
         event => {
 
@@ -696,8 +685,13 @@ function renderStock() {
 
 function drawFromStock() {
 
-    if (gameWon) {
+    if (
+        gameWon ||
+        gameOver
+    ) {
+
         return;
+
     }
 
 
@@ -838,11 +832,6 @@ function renderFoundations() {
                 pile.length === 0
             ) {
 
-                /*
-                   Foundation remains clickable
-                   even when empty.
-                */
-
                 setupFoundationTarget(
                     element,
                     suit
@@ -903,23 +892,11 @@ function setupFoundationTarget(
     suit
 ) {
 
-    /*
-       Remove old handler.
-
-       This prevents duplicate click
-       handlers after every render.
-    */
-
     element.onclick = null;
 
 
     element.onclick =
         event => {
-
-            /*
-               If the player tapped the card,
-               its own click handler handles it.
-            */
 
             if (
                 event.target !== element
@@ -930,8 +907,14 @@ function setupFoundationTarget(
             }
 
 
-            if (!selectedCards) {
+            if (
+                !selectedCards ||
+                gameWon ||
+                gameOver
+            ) {
+
                 return;
+
             }
 
 
@@ -998,10 +981,6 @@ function setupFoundationTarget(
 
         };
 
-
-    /*
-       Desktop drag target.
-    */
 
     element.ondragover =
         event => {
@@ -1126,17 +1105,11 @@ function renderTableau() {
             );
 
 
-            /*
-               IMPORTANT:
-               Only ONE click handler per render.
-            */
-
             columnElement.onclick = null;
 
 
             /*
                EMPTY COLUMN
-
                Only a King can be placed here.
             */
 
@@ -1151,7 +1124,9 @@ function renderTableau() {
 
 
                         if (
-                            !selectedCards
+                            !selectedCards ||
+                            gameWon ||
+                            gameOver
                         ) {
 
                             return;
@@ -1195,10 +1170,6 @@ function renderTableau() {
             }
 
 
-            /*
-               Render every card.
-            */
-
             column.forEach(
                 (
                     card,
@@ -1236,10 +1207,6 @@ function renderTableau() {
             );
 
 
-            /*
-               Desktop drag/drop.
-            */
-
             columnElement.ondragover =
                 event => {
 
@@ -1247,7 +1214,9 @@ function renderTableau() {
 
 
                     if (
-                        !draggedCards
+                        !draggedCards ||
+                        gameWon ||
+                        gameOver
                     ) {
 
                         return;
@@ -1301,7 +1270,9 @@ function renderTableau() {
 
 
                     if (
-                        draggedCards
+                        draggedCards &&
+                        !gameWon &&
+                        !gameOver
                     ) {
 
                         const valid =
@@ -1341,9 +1312,7 @@ function addCardInteraction(
 ) {
 
     /*
-       =====================================================
        TAP
-       =====================================================
     */
 
     element.addEventListener(
@@ -1352,6 +1321,16 @@ function addCardInteraction(
 
             event.preventDefault();
             event.stopPropagation();
+
+
+            if (
+                gameWon ||
+                gameOver
+            ) {
+
+                return;
+
+            }
 
 
             /*
@@ -1378,11 +1357,6 @@ function addCardInteraction(
                         ];
 
 
-                    /*
-                       Only top face-down card
-                       can be flipped.
-                    */
-
                     if (
                         top === card
                     ) {
@@ -1396,6 +1370,12 @@ function addCardInteraction(
                         vibrate(25);
 
                         render();
+
+                        checkWin();
+
+                        if (!gameWon) {
+                            checkNoMoreMoves();
+                        }
 
                     }
 
@@ -1417,10 +1397,8 @@ function addCardInteraction(
 
 
     /*
-       =====================================================
        DOUBLE CLICK
        Automatically move to foundation.
-       =====================================================
     */
 
     element.addEventListener(
@@ -1432,7 +1410,9 @@ function addCardInteraction(
 
 
             if (
-                !card.faceUp
+                !card.faceUp ||
+                gameWon ||
+                gameOver
             ) {
 
                 return;
@@ -1477,9 +1457,7 @@ function addCardInteraction(
 
 
     /*
-       =====================================================
        DESKTOP DRAG
-       =====================================================
     */
 
     element.addEventListener(
@@ -1487,7 +1465,9 @@ function addCardInteraction(
         event => {
 
             if (
-                !card.faceUp
+                !card.faceUp ||
+                gameWon ||
+                gameOver
             ) {
 
                 event.preventDefault();
@@ -1587,8 +1567,13 @@ function handleCardTap(
     element
 ) {
 
-    if (gameWon) {
+    if (
+        gameWon ||
+        gameOver
+    ) {
+
         return;
+
     }
 
 
@@ -1596,9 +1581,7 @@ function handleCardTap(
 
 
     /*
-       =====================================================
        FIRST TAP
-       =====================================================
     */
 
     if (!selectedCards) {
@@ -1641,10 +1624,8 @@ function handleCardTap(
 
 
     /*
-       =====================================================
        SECOND TAP ON SAME CARD
        Cancel selection.
-       =====================================================
     */
 
     if (
@@ -1661,9 +1642,7 @@ function handleCardTap(
 
 
     /*
-       =====================================================
        SECOND TAP ON TABLEAU CARD
-       =====================================================
     */
 
     if (
@@ -1702,10 +1681,6 @@ function handleCardTap(
         }
 
 
-        /*
-           WRONG MOVE
-        */
-
         showMoveFeedback(
             false,
             element
@@ -1718,9 +1693,7 @@ function handleCardTap(
 
 
     /*
-       =====================================================
-       SECOND TAP ON FOUNDATION CARD
-       =====================================================
+       SECOND TAP ON FOUNDATION
     */
 
     if (
@@ -1782,10 +1755,8 @@ function handleCardTap(
 
 
     /*
-       =====================================================
        TAP ANOTHER MOVABLE CARD
        Change selection.
-       =====================================================
     */
 
     const newMovable =
@@ -1890,8 +1861,7 @@ function getMovableCards(
 
 
         /*
-           Check that the selected sequence
-           itself is valid.
+           Check sequence itself.
         */
 
         for (
@@ -2023,6 +1993,16 @@ function canMoveToTableau(
     }
 
 
+    if (
+        gameWon ||
+        gameOver
+    ) {
+
+        return false;
+
+    }
+
+
     const movingCard =
         cards[0];
 
@@ -2123,7 +2103,9 @@ function canMoveToFoundation(
 
     if (
         !card ||
-        !card.faceUp
+        !card.faceUp ||
+        gameWon ||
+        gameOver
     ) {
 
         return false;
@@ -2132,8 +2114,7 @@ function canMoveToFoundation(
 
 
     /*
-       Foundation can only receive
-       a single card.
+       Foundation only receives one card.
     */
 
     const movable =
@@ -2228,8 +2209,7 @@ function moveToTableau(
 
 
     /*
-       Turn over the new top card
-       of the source column.
+       Turn over new top card.
     */
 
     if (
@@ -2250,6 +2230,13 @@ function moveToTableau(
     render();
 
     checkWin();
+
+
+    if (!gameWon) {
+
+        checkNoMoreMoves();
+
+    }
 
 
     return true;
@@ -2313,6 +2300,13 @@ function moveCardToFoundation(
     render();
 
     checkWin();
+
+
+    if (!gameWon) {
+
+        checkNoMoreMoves();
+
+    }
 
 
     return true;
@@ -2551,12 +2545,9 @@ function highlightSelectedCards() {
 function clearSelection() {
 
     selectedCards = null;
-
     selectedSource = null;
 
-
     draggedCards = null;
-
     draggedSource = null;
 
 
@@ -2603,6 +2594,7 @@ function showMoveFeedback(
 ) {
 
     if (!element) {
+
         vibrate(
             valid
                 ? [25, 30, 25]
@@ -2610,6 +2602,7 @@ function showMoveFeedback(
         );
 
         return;
+
     }
 
 
@@ -2618,10 +2611,6 @@ function showMoveFeedback(
         "move-wrong"
     );
 
-
-    /*
-       Force animation restart.
-    */
 
     void element.offsetWidth;
 
@@ -2692,10 +2681,398 @@ function vibrate(pattern) {
 
 
 /* =========================================================
+   NO MORE MOVES CHECK
+========================================================= */
+
+/*
+   This checks whether the current position
+   has any legal moves left.
+
+   IMPORTANT:
+
+   Stock cards are treated as potential moves.
+   If stock still exists, the player can still
+   draw cards.
+
+   If waste exists while stock is empty,
+   the waste can be recycled.
+
+   Therefore the game is only declared dead when:
+
+   - Stock is empty
+   - Waste is empty
+   - No face-down tableau card can be flipped
+   - No tableau card can move
+   - No tableau card can move to foundation
+*/
+
+function checkNoMoreMoves() {
+
+    if (
+        gameWon ||
+        gameOver
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+       WIN ALWAYS HAS PRIORITY.
+    */
+
+    if (
+        isGameComplete()
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+       STOCK STILL HAS CARDS.
+
+       Player can still draw.
+    */
+
+    if (
+        stock.length > 0
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+       WASTE STILL EXISTS.
+
+       With the current unlimited-recycle
+       Klondike system, the player can
+       recycle it back into the stock.
+    */
+
+    if (
+        waste.length > 0
+    ) {
+
+        /*
+           First check whether the waste
+           top card has a direct move.
+        */
+
+        const wasteCard =
+            waste[
+                waste.length - 1
+            ];
+
+
+        const wasteSource = {
+            type: "waste"
+        };
+
+
+        /*
+           Waste → Foundation
+        */
+
+        if (
+            canMoveToFoundation(
+                wasteCard,
+                wasteSource
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+           Waste → Tableau
+        */
+
+        for (
+            let column = 0;
+            column < 7;
+            column++
+        ) {
+
+            if (
+                canMoveToTableau(
+                    [wasteCard],
+                    wasteSource,
+                    column
+                )
+            ) {
+
+                return;
+
+            }
+
+        }
+
+
+        /*
+           Even if the waste cannot move,
+           it can still be recycled.
+        */
+
+        return;
+
+    }
+
+
+    /*
+       =====================================================
+       CHECK TABLEAU
+       =====================================================
+    */
+
+    for (
+        let column = 0;
+        column < 7;
+        column++
+    ) {
+
+        const cards =
+            tableau[column];
+
+
+        /*
+           IMPORTANT:
+           A face-down TOP CARD can be flipped.
+
+           This is a legal move, so don't declare
+           Game Over while one exists.
+        */
+
+        if (
+            cards.length > 0
+        ) {
+
+            const top =
+                cards[
+                    cards.length - 1
+                ];
+
+
+            if (
+                !top.faceUp
+            ) {
+
+                return;
+
+            }
+
+        }
+
+
+        /*
+           Check every face-up card.
+        */
+
+        for (
+            let index = 0;
+            index < cards.length;
+            index++
+        ) {
+
+            const card =
+                cards[index];
+
+
+            if (
+                !card.faceUp
+            ) {
+
+                continue;
+
+            }
+
+
+            const source = {
+
+                type: "tableau",
+
+                column: column,
+
+                index: index
+
+            };
+
+
+            /*
+               Tableau → Foundation
+            */
+
+            if (
+                canMoveToFoundation(
+                    card,
+                    source
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+               Get complete movable sequence.
+            */
+
+            const movable =
+                getMovableCards(
+                    card,
+                    source
+                );
+
+
+            if (
+                movable.length === 0
+            ) {
+
+                continue;
+
+            }
+
+
+            /*
+               Tableau → Tableau
+            */
+
+            for (
+                let destination = 0;
+                destination < 7;
+                destination++
+            ) {
+
+                if (
+                    destination === column
+                ) {
+
+                    continue;
+
+                }
+
+
+                if (
+                    canMoveToTableau(
+                        movable,
+                        source,
+                        destination
+                    )
+                ) {
+
+                    return;
+
+                }
+
+            }
+
+        }
+
+    }
+
+
+    /*
+       =====================================================
+       NOTHING LEFT
+       =====================================================
+    */
+
+    triggerNoMoreMoves();
+
+}
+
+
+/* =========================================================
+   GAME COMPLETE CHECK
+========================================================= */
+
+function isGameComplete() {
+
+    let totalCards = 0;
+
+
+    suits.forEach(
+        suit => {
+
+            totalCards +=
+                foundations[
+                    suit
+                ].length;
+
+        }
+    );
+
+
+    return totalCards === 52;
+
+}
+
+
+/* =========================================================
+   NO MORE MOVES GAME OVER
+========================================================= */
+
+function triggerNoMoreMoves() {
+
+    if (
+        gameWon ||
+        gameOver
+    ) {
+
+        return;
+
+    }
+
+
+    gameOver = true;
+
+    stopTimer();
+
+    clearSelection();
+
+
+    updateMessage(
+        "No more moves! 😵 Game Over!"
+    );
+
+
+    vibrate(
+        [100, 50, 100, 50, 150]
+    );
+
+
+    if (restartButton) {
+
+        restartButton.textContent =
+            "😵";
+
+    }
+
+}
+
+
+/* =========================================================
    WIN CHECK
 ========================================================= */
 
 function checkWin() {
+
+    if (
+        gameWon ||
+        gameOver
+    ) {
+
+        return;
+
+    }
+
 
     let totalCards =
         0;
