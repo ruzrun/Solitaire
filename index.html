@@ -79,12 +79,27 @@
             </div>
 
 
+            <!-- RESTART -->
+
             <button
                 id="restartButton"
                 class="restart-button"
                 type="button"
+                aria-label="Restart game"
             >
                 🔄
+            </button>
+
+
+            <!-- HOW TO PLAY -->
+
+            <button
+                id="infoButton"
+                class="info-button"
+                type="button"
+                aria-label="How to play"
+            >
+                ⓘ
             </button>
 
 
@@ -255,7 +270,187 @@
 
 
 
-    <!-- WIN MESSAGE -->
+    <!-- =====================================================
+         HOW TO PLAY OVERLAY
+    ====================================================== -->
+
+    <div
+        id="rulesOverlay"
+        class="rules-overlay"
+        aria-hidden="true"
+    >
+
+        <div
+            class="rules-box"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="rulesTitle"
+        >
+
+            <!-- CLOSE -->
+
+            <button
+                id="closeRulesButton"
+                class="close-rules"
+                type="button"
+                aria-label="Close instructions"
+            >
+                ×
+            </button>
+
+
+            <!-- TITLE -->
+
+            <h2 id="rulesTitle">
+                🃏 How to Play
+            </h2>
+
+
+            <p class="rules-intro">
+                Your goal is to move all 52 cards
+                into the four foundations.
+            </p>
+
+
+
+            <!-- RULES -->
+
+            <div class="rule-item">
+
+                <strong>
+                    🃏 Tableau
+                </strong>
+
+                <span>
+                    Build cards downward in number,
+                    alternating between red and black.
+                </span>
+
+            </div>
+
+
+            <div class="rule-item">
+
+                <strong>
+                    👑 Empty Column
+                </strong>
+
+                <span>
+                    Only a King can be placed
+                    into an empty column.
+                </span>
+
+            </div>
+
+
+            <div class="rule-item">
+
+                <strong>
+                    🅰️ Foundation
+                </strong>
+
+                <span>
+                    Build each suit upward from
+                    Ace → 2 → 3 → ... → King.
+                </span>
+
+            </div>
+
+
+            <div class="rule-item">
+
+                <strong>
+                    🔄 Stock
+                </strong>
+
+                <span>
+                    Tap the deck to draw cards.
+                    When the stock is empty,
+                    tap it again to recycle the waste.
+                </span>
+
+            </div>
+
+
+            <div class="rule-item">
+
+                <strong>
+                    📱 Mobile
+                </strong>
+
+                <span>
+                    Tap a card, then tap the
+                    place where you want to move it.
+                </span>
+
+            </div>
+
+
+            <div class="rule-item">
+
+                <strong>
+                    🖥️ Desktop
+                </strong>
+
+                <span>
+                    Drag and drop cards
+                    between piles.
+                </span>
+
+            </div>
+
+
+            <div class="rule-item">
+
+                <strong>
+                    🎯 Moving Groups
+                </strong>
+
+                <span>
+                    You can move a valid sequence
+                    of face-up cards together.
+                </span>
+
+            </div>
+
+
+            <div class="rule-item">
+
+                <strong>
+                    🏆 Win
+                </strong>
+
+                <span>
+                    Move all 52 cards into the
+                    four foundations to win.
+                </span>
+
+            </div>
+
+
+            <div class="rule-item">
+
+                <strong>
+                    😵 No More Moves
+                </strong>
+
+                <span>
+                    If there are no legal moves
+                    remaining, the game ends.
+                </span>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         WIN MESSAGE
+    ====================================================== -->
 
     <div
         id="winOverlay"
@@ -291,10 +486,11 @@
 
 
 
+    <!-- JAVASCRIPT -->
+
     <script src="solitaire.js"></script>
+
 
 </body>
 
 </html>
-
-The HTML is now ready for the CSS, and then we'll make the JS handle the actual 52-card Klond
