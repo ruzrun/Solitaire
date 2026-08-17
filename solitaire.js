@@ -29,6 +29,15 @@ const musicButton = document.getElementById("musicButton");
 const winOverlay = document.getElementById("winOverlay");
 const winRestartButton = document.getElementById("winRestartButton");
 
+const infoButton =
+    document.getElementById("infoButton");
+
+const rulesOverlay =
+    document.getElementById("rulesOverlay");
+
+const closeRulesButton =
+    document.getElementById("closeRulesButton");
+
 
 /* =========================================================
    CARD IMAGE SOURCE
@@ -3291,7 +3300,75 @@ document.addEventListener(
     }
 );
 
+/* =========================================================
+   HOW TO PLAY
+========================================================= */
 
+if (infoButton) {
+
+    infoButton.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+            if (rulesOverlay) {
+
+                rulesOverlay.classList.add(
+                    "show"
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+if (closeRulesButton) {
+
+    closeRulesButton.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+            if (rulesOverlay) {
+
+                rulesOverlay.classList.remove(
+                    "show"
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+if (rulesOverlay) {
+
+    rulesOverlay.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target ===
+                rulesOverlay
+            ) {
+
+                rulesOverlay.classList.remove(
+                    "show"
+                );
+
+            }
+
+        }
+    );
+
+}
 /* =========================================================
    START GAME
 ========================================================= */
