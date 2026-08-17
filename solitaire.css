@@ -833,3 +833,67 @@ h1 {
     }
 
 }
+
+/* =========================================================
+   WRONG MOVE
+========================================================= */
+
+.move-wrong {
+    animation: wrongShake 0.45s ease;
+    box-shadow:
+        0 0 0 3px rgba(255, 60, 60, 0.9),
+        0 0 18px rgba(255, 40, 40, 0.9),
+        0 0 35px rgba(255, 40, 40, 0.55) !important;
+    border-radius: 12px;
+}
+
+
+/* =========================================================
+   WRONG MOVE SHAKE
+========================================================= */
+
+@keyframes wrongShake {
+
+    0% {
+        transform: translateX(0) rotate(0deg);
+    }
+
+    15% {
+        transform: translateX(-7px) rotate(-2deg);
+    }
+
+    30% {
+        transform: translateX(7px) rotate(2deg);
+    }
+
+    45% {
+        transform: translateX(-6px) rotate(-2deg);
+    }
+
+    60% {
+        transform: translateX(6px) rotate(2deg);
+    }
+
+    75% {
+        transform: translateX(-3px) rotate(-1deg);
+    }
+
+    100% {
+        transform: translateX(0) rotate(0deg);
+    }
+
+}
+
+
+/* =========================================================
+   CORRECT MOVE
+========================================================= */
+
+.move-correct {
+    box-shadow:
+        0 0 0 3px rgba(60, 140, 255, 0.9),
+        0 0 18px rgba(60, 140, 255, 0.8),
+        0 0 30px rgba(60, 140, 255, 0.45) !important;
+
+    border-radius: 12px;
+}
